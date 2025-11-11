@@ -1,0 +1,1123 @@
+{
+    "integrations": [
+      {
+        "installationId": "icfg_3bwCLgxL8qt5kjRLcv2Dit7F",
+        "resources": [
+          {
+            "externalResourceId": "<string>"
+          }
+        ]
+      }
+    ],
+    "accountId": "<string>",
+    "analytics": {
+      "id": "<string>",
+      "canceledAt": 123,
+      "disabledAt": 123,
+      "enabledAt": 123,
+      "paidAt": 123,
+      "sampleRatePercent": 123,
+      "spendLimitInDollars": 123
+    },
+    "speedInsights": {
+      "id": "<string>",
+      "enabledAt": 123,
+      "disabledAt": 123,
+      "canceledAt": 123,
+      "hasData": true,
+      "paidAt": 123
+    },
+    "autoExposeSystemEnvs": true,
+    "autoAssignCustomDomains": true,
+    "autoAssignCustomDomainsUpdatedBy": "<string>",
+    "buildCommand": "<string>",
+    "commandForIgnoringBuildStep": "<string>",
+    "connectConfigurations": [
+      {
+        "envId": "<string>",
+        "connectConfigurationId": "<string>",
+        "dc": "<string>",
+        "passive": true,
+        "buildsEnabled": true,
+        "aws": {
+          "subnetIds": [
+            "<string>"
+          ],
+          "securityGroupId": "<string>"
+        },
+        "createdAt": 123,
+        "updatedAt": 123
+      }
+    ],
+    "connectConfigurationId": "<string>",
+    "connectBuildsEnabled": true,
+    "passiveConnectConfigurationId": "<string>",
+    "createdAt": 123,
+    "customerSupportCodeVisibility": true,
+    "crons": {
+      "enabledAt": 123,
+      "disabledAt": 123,
+      "updatedAt": 123,
+      "deploymentId": "<string>",
+      "definitions": [
+        {
+          "host": "vercel.com",
+          "path": "/api/crons/sync-something?hello=world",
+          "schedule": "0 0 * * *"
+        }
+      ]
+    },
+    "dataCache": {
+      "userDisabled": true,
+      "storageSizeBytes": 123,
+      "unlimited": true
+    },
+    "deploymentExpiration": {
+      "expirationDays": 123,
+      "expirationDaysProduction": 123,
+      "expirationDaysCanceled": 123,
+      "expirationDaysErrored": 123,
+      "deploymentsToKeep": 123
+    },
+    "devCommand": "<string>",
+    "directoryListing": true,
+    "installCommand": "<string>",
+    "env": [
+      {
+        "target": [
+          "production"
+        ],
+        "type": "system",
+        "sunsetSecretId": "<string>",
+        "decrypted": true,
+        "value": "<string>",
+        "vsmValue": "<string>",
+        "id": "<string>",
+        "key": "<string>",
+        "configurationId": "<string>",
+        "createdAt": 123,
+        "updatedAt": 123,
+        "createdBy": "<string>",
+        "updatedBy": "<string>",
+        "gitBranch": "<string>",
+        "edgeConfigId": "<string>",
+        "edgeConfigTokenId": "<string>",
+        "contentHint": {
+          "type": "redis-url",
+          "storeId": "<string>"
+        },
+        "internalContentHint": {
+          "type": "flags-secret",
+          "encryptedValue": "<string>"
+        },
+        "comment": "<string>",
+        "customEnvironmentIds": [
+          "<string>"
+        ]
+      }
+    ],
+    "customEnvironments": [
+      {
+        "id": "<string>",
+        "slug": "<string>",
+        "type": "preview",
+        "description": "<string>",
+        "branchMatcher": {
+          "type": "endsWith",
+          "pattern": "<string>"
+        },
+        "domains": [
+          {
+            "name": "<string>",
+            "apexName": "<string>",
+            "projectId": "<string>",
+            "redirect": "<string>",
+            "redirectStatusCode": 307,
+            "gitBranch": "<string>",
+            "customEnvironmentId": "<string>",
+            "updatedAt": 123,
+            "createdAt": 123,
+            "verified": true,
+            "verification": [
+              {
+                "type": "<string>",
+                "domain": "<string>",
+                "value": "<string>",
+                "reason": "<string>"
+              }
+            ]
+          }
+        ],
+        "currentDeploymentAliases": [
+          "<string>"
+        ],
+        "createdAt": 123,
+        "updatedAt": 123
+      }
+    ],
+    "framework": "blitzjs",
+    "gitForkProtection": true,
+    "gitLFS": true,
+    "id": "<string>",
+    "ipBuckets": [
+      {
+        "bucket": "<string>",
+        "supportUntil": 123
+      }
+    ],
+    "latestDeployments": [
+      {
+        "id": "<string>",
+        "alias": [
+          "<string>"
+        ],
+        "aliasAssigned": 123,
+        "aliasError": {
+          "code": "<string>",
+          "message": "<string>"
+        },
+        "aliasFinal": "<string>",
+        "automaticAliases": [
+          "<string>"
+        ],
+        "branchMatcher": {
+          "type": "endsWith",
+          "pattern": "<string>"
+        },
+        "buildingAt": 123,
+        "builds": [
+          {
+            "use": "<string>",
+            "src": "<string>",
+            "dest": "<string>"
+          }
+        ],
+        "checksConclusion": "succeeded",
+        "checksState": "registered",
+        "connectBuildsEnabled": true,
+        "connectConfigurationId": "<string>",
+        "createdAt": 123,
+        "createdIn": "<string>",
+        "creator": {
+          "email": "<string>",
+          "githubLogin": "<string>",
+          "gitlabLogin": "<string>",
+          "uid": "<string>",
+          "username": "<string>"
+        },
+        "deletedAt": 123,
+        "deploymentHostname": "<string>",
+        "forced": true,
+        "name": "<string>",
+        "meta": {},
+        "monorepoManager": "<string>",
+        "oidcTokenClaims": {
+          "iss": "<string>",
+          "sub": "<string>",
+          "scope": "<string>",
+          "aud": "<string>",
+          "owner": "<string>",
+          "owner_id": "<string>",
+          "project": "<string>",
+          "project_id": "<string>",
+          "environment": "<string>"
+        },
+        "plan": "pro",
+        "previewCommentsEnabled": false,
+        "private": true,
+        "readyAt": 123,
+        "readyState": "BUILDING",
+        "readySubstate": "STAGED",
+        "requestedAt": 123,
+        "target": "<string>",
+        "teamId": "<string>",
+        "type": "LAMBDAS",
+        "url": "<string>",
+        "userId": "<string>",
+        "withCache": true
+      }
+    ],
+    "link": {
+      "org": "<string>",
+      "repoOwnerId": 123,
+      "repo": "<string>",
+      "repoId": 123,
+      "type": "github",
+      "createdAt": 123,
+      "deployHooks": [
+        {
+          "createdAt": 123,
+          "id": "<string>",
+          "name": "<string>",
+          "ref": "<string>",
+          "url": "<string>"
+        }
+      ],
+      "gitCredentialId": "<string>",
+      "updatedAt": 123,
+      "sourceless": true,
+      "productionBranch": "<string>"
+    },
+    "microfrontends": {
+      "isDefaultApp": true,
+      "updatedAt": 123,
+      "groupIds": [
+        "<string>"
+      ],
+      "enabled": true,
+      "defaultRoute": "<string>"
+    },
+    "name": "<string>",
+    "nodeVersion": "22.x",
+    "optionsAllowlist": {
+      "paths": [
+        {
+          "value": "<string>"
+        }
+      ]
+    },
+    "outputDirectory": "<string>",
+    "passwordProtection": {},
+    "productionDeploymentsFastLane": true,
+    "publicSource": true,
+    "resourceConfig": {
+      "elasticConcurrencyEnabled": true,
+      "fluid": true,
+      "functionDefaultRegions": [
+        "<string>"
+      ],
+      "functionDefaultTimeout": 123,
+      "functionDefaultMemoryType": "standard_legacy",
+      "functionZeroConfigFailover": true,
+      "buildMachineType": "enhanced",
+      "isNSNBDisabled": true
+    },
+    "rollbackDescription": {
+      "userId": "<string>",
+      "username": "<string>",
+      "description": "<string>",
+      "createdAt": 123
+    },
+    "rollingRelease": {
+      "target": "production",
+      "stages": [
+        {
+          "targetPercentage": 25,
+          "requireApproval": false,
+          "duration": 600,
+          "linearShift": false
+        }
+      ],
+      "canaryResponseHeader": false
+    },
+    "defaultResourceConfig": {
+      "elasticConcurrencyEnabled": true,
+      "fluid": true,
+      "functionDefaultRegions": [
+        "<string>"
+      ],
+      "functionDefaultTimeout": 123,
+      "functionDefaultMemoryType": "standard_legacy",
+      "functionZeroConfigFailover": true,
+      "buildMachineType": "enhanced",
+      "isNSNBDisabled": true
+    },
+    "rootDirectory": "<string>",
+    "serverlessFunctionZeroConfigFailover": true,
+    "skewProtectionBoundaryAt": 123,
+    "skewProtectionMaxAge": 123,
+    "skipGitConnectDuringLink": true,
+    "sourceFilesOutsideRootDirectory": true,
+    "enableAffectedProjectsDeployments": true,
+    "ssoProtection": {
+      "deploymentType": "preview"
+    },
+    "targets": {},
+    "transferCompletedAt": 123,
+    "transferStartedAt": 123,
+    "transferToAccountId": "<string>",
+    "transferredFromAccountId": "<string>",
+    "updatedAt": 123,
+    "live": true,
+    "enablePreviewFeedback": true,
+    "enableProductionFeedback": true,
+    "permissions": {
+      "aliasProject": [
+        "create"
+      ],
+      "aliasProtectionBypass": [
+        "create"
+      ],
+      "buildMachine": [
+        "create"
+      ],
+      "connectConfigurationLink": [
+        "create"
+      ],
+      "dataCacheNamespace": [
+        "create"
+      ],
+      "deployment": [
+        "create"
+      ],
+      "deploymentBuildLogs": [
+        "create"
+      ],
+      "deploymentCheck": [
+        "create"
+      ],
+      "deploymentCheckPreview": [
+        "create"
+      ],
+      "deploymentCheckReRunFromProductionBranch": [
+        "create"
+      ],
+      "deploymentProductionGit": [
+        "create"
+      ],
+      "deploymentV0": [
+        "create"
+      ],
+      "deploymentPreview": [
+        "create"
+      ],
+      "deploymentPrivate": [
+        "create"
+      ],
+      "deploymentPromote": [
+        "create"
+      ],
+      "deploymentRollback": [
+        "create"
+      ],
+      "edgeCacheNamespace": [
+        "create"
+      ],
+      "environments": [
+        "create"
+      ],
+      "job": [
+        "create"
+      ],
+      "logs": [
+        "create"
+      ],
+      "logsPreset": [
+        "create"
+      ],
+      "observabilityData": [
+        "create"
+      ],
+      "onDemandBuild": [
+        "create"
+      ],
+      "onDemandConcurrency": [
+        "create"
+      ],
+      "optionsAllowlist": [
+        "create"
+      ],
+      "passwordProtection": [
+        "create"
+      ],
+      "productionAliasProtectionBypass": [
+        "create"
+      ],
+      "project": [
+        "create"
+      ],
+      "projectAccessGroup": [
+        "create"
+      ],
+      "projectAnalyticsSampling": [
+        "create"
+      ],
+      "projectAnalyticsUsage": [
+        "create"
+      ],
+      "projectCheck": [
+        "create"
+      ],
+      "projectCheckRun": [
+        "create"
+      ],
+      "projectDeploymentExpiration": [
+        "create"
+      ],
+      "projectDeploymentHook": [
+        "create"
+      ],
+      "projectDomain": [
+        "create"
+      ],
+      "projectDomainCheckConfig": [
+        "create"
+      ],
+      "projectDomainMove": [
+        "create"
+      ],
+      "projectEnvVars": [
+        "create"
+      ],
+      "projectEnvVarsProduction": [
+        "create"
+      ],
+      "projectEnvVarsUnownedByIntegration": [
+        "create"
+      ],
+      "projectFlags": [
+        "create"
+      ],
+      "projectFromV0": [
+        "create"
+      ],
+      "projectId": [
+        "create"
+      ],
+      "projectIntegrationConfiguration": [
+        "create"
+      ],
+      "projectLink": [
+        "create"
+      ],
+      "projectMember": [
+        "create"
+      ],
+      "projectMonitoring": [
+        "create"
+      ],
+      "projectOIDCToken": [
+        "create"
+      ],
+      "projectPermissions": [
+        "create"
+      ],
+      "projectProductionBranch": [
+        "create"
+      ],
+      "projectProtectionBypass": [
+        "create"
+      ],
+      "projectRollingRelease": [
+        "create"
+      ],
+      "projectSupportCase": [
+        "create"
+      ],
+      "projectSupportCaseComment": [
+        "create"
+      ],
+      "projectTier": [
+        "create"
+      ],
+      "projectTransfer": [
+        "create"
+      ],
+      "projectTransferOut": [
+        "create"
+      ],
+      "projectUsage": [
+        "create"
+      ],
+      "seawallConfig": [
+        "create"
+      ],
+      "sharedEnvVarConnection": [
+        "create"
+      ],
+      "skewProtection": [
+        "create"
+      ],
+      "analytics": [
+        "create"
+      ],
+      "trustedIps": [
+        "create"
+      ],
+      "v0Chat": [
+        "create"
+      ],
+      "webAnalytics": [
+        "create"
+      ],
+      "accessGroup": [
+        "create"
+      ],
+      "agent": [
+        "create"
+      ],
+      "alerts": [
+        "create"
+      ],
+      "aliasGlobal": [
+        "create"
+      ],
+      "analyticsSampling": [
+        "create"
+      ],
+      "analyticsUsage": [
+        "create"
+      ],
+      "apiKey": [
+        "create"
+      ],
+      "apiKeyAiGateway": [
+        "create"
+      ],
+      "apiKeyOwnedBySelf": [
+        "create"
+      ],
+      "oauth2Application": [
+        "create"
+      ],
+      "vercelAppInstallation": [
+        "create"
+      ],
+      "vercelAppInstallationRequest": [
+        "create"
+      ],
+      "auditLog": [
+        "create"
+      ],
+      "billingAddress": [
+        "create"
+      ],
+      "billingInformation": [
+        "create"
+      ],
+      "billingInvoice": [
+        "create"
+      ],
+      "billingInvoiceEmailRecipient": [
+        "create"
+      ],
+      "billingInvoiceLanguage": [
+        "create"
+      ],
+      "billingPlan": [
+        "create"
+      ],
+      "billingPurchaseOrder": [
+        "create"
+      ],
+      "billingRefund": [
+        "create"
+      ],
+      "billingTaxId": [
+        "create"
+      ],
+      "blob": [
+        "create"
+      ],
+      "blobStoreTokenSet": [
+        "create"
+      ],
+      "budget": [
+        "create"
+      ],
+      "cacheArtifact": [
+        "create"
+      ],
+      "cacheArtifactUsageEvent": [
+        "create"
+      ],
+      "codeChecks": [
+        "create"
+      ],
+      "concurrentBuilds": [
+        "create"
+      ],
+      "connect": [
+        "create"
+      ],
+      "connectConfiguration": [
+        "create"
+      ],
+      "dataCacheBillingSettings": [
+        "create"
+      ],
+      "defaultDeploymentProtection": [
+        "create"
+      ],
+      "domain": [
+        "create"
+      ],
+      "domainAcceptDelegation": [
+        "create"
+      ],
+      "domainAuthCodes": [
+        "create"
+      ],
+      "domainCertificate": [
+        "create"
+      ],
+      "domainCheckConfig": [
+        "create"
+      ],
+      "domainMove": [
+        "create"
+      ],
+      "domainPurchase": [
+        "create"
+      ],
+      "domainRecord": [
+        "create"
+      ],
+      "domainTransferIn": [
+        "create"
+      ],
+      "drain": [
+        "create"
+      ],
+      "edgeConfig": [
+        "create"
+      ],
+      "edgeConfigItem": [
+        "create"
+      ],
+      "edgeConfigSchema": [
+        "create"
+      ],
+      "edgeConfigToken": [
+        "create"
+      ],
+      "endpointVerification": [
+        "create"
+      ],
+      "event": [
+        "create"
+      ],
+      "fileUpload": [
+        "create"
+      ],
+      "flagsExplorerSubscription": [
+        "create"
+      ],
+      "gitRepository": [
+        "create"
+      ],
+      "imageOptimizationNewPrice": [
+        "create"
+      ],
+      "integration": [
+        "create"
+      ],
+      "integrationAccount": [
+        "create"
+      ],
+      "integrationConfiguration": [
+        "create"
+      ],
+      "integrationConfigurationProjects": [
+        "create"
+      ],
+      "integrationConfigurationRole": [
+        "create"
+      ],
+      "integrationConfigurationTransfer": [
+        "create"
+      ],
+      "integrationDeploymentAction": [
+        "create"
+      ],
+      "integrationEvent": [
+        "create"
+      ],
+      "integrationLog": [
+        "create"
+      ],
+      "integrationResource": [
+        "create"
+      ],
+      "integrationResourceReplCommand": [
+        "create"
+      ],
+      "integrationResourceSecrets": [
+        "create"
+      ],
+      "integrationSSOSession": [
+        "create"
+      ],
+      "integrationStoreTokenSet": [
+        "create"
+      ],
+      "integrationVercelConfigurationOverride": [
+        "create"
+      ],
+      "integrationPullRequest": [
+        "create"
+      ],
+      "ipBlocking": [
+        "create"
+      ],
+      "jobGlobal": [
+        "create"
+      ],
+      "logDrain": [
+        "create"
+      ],
+      "marketplaceBillingData": [
+        "create"
+      ],
+      "marketplaceExperimentationEdgeConfigData": [
+        "create"
+      ],
+      "marketplaceExperimentationItem": [
+        "create"
+      ],
+      "marketplaceInstallationMember": [
+        "create"
+      ],
+      "marketplaceInvoice": [
+        "create"
+      ],
+      "marketplaceSettings": [
+        "create"
+      ],
+      "Monitoring": [
+        "create"
+      ],
+      "monitoringAlert": [
+        "create"
+      ],
+      "monitoringChart": [
+        "create"
+      ],
+      "monitoringQuery": [
+        "create"
+      ],
+      "monitoringSettings": [
+        "create"
+      ],
+      "notificationCustomerBudget": [
+        "create"
+      ],
+      "notificationDeploymentFailed": [
+        "create"
+      ],
+      "notificationDomainConfiguration": [
+        "create"
+      ],
+      "notificationDomainExpire": [
+        "create"
+      ],
+      "notificationDomainMoved": [
+        "create"
+      ],
+      "notificationDomainPurchase": [
+        "create"
+      ],
+      "notificationDomainRenewal": [
+        "create"
+      ],
+      "notificationDomainTransfer": [
+        "create"
+      ],
+      "notificationDomainUnverified": [
+        "create"
+      ],
+      "NotificationMonitoringAlert": [
+        "create"
+      ],
+      "notificationPaymentFailed": [
+        "create"
+      ],
+      "notificationPreferences": [
+        "create"
+      ],
+      "notificationStatementOfReasons": [
+        "create"
+      ],
+      "notificationUsageAlert": [
+        "create"
+      ],
+      "observabilityConfiguration": [
+        "create"
+      ],
+      "observabilityFunnel": [
+        "create"
+      ],
+      "observabilityNotebook": [
+        "create"
+      ],
+      "openTelemetryEndpoint": [
+        "create"
+      ],
+      "ownEvent": [
+        "create"
+      ],
+      "passwordProtectionInvoiceItem": [
+        "create"
+      ],
+      "paymentMethod": [
+        "create"
+      ],
+      "permissions": [
+        "create"
+      ],
+      "postgres": [
+        "create"
+      ],
+      "postgresStoreTokenSet": [
+        "create"
+      ],
+      "previewDeploymentSuffix": [
+        "create"
+      ],
+      "projectTransferIn": [
+        "create"
+      ],
+      "proTrialOnboarding": [
+        "create"
+      ],
+      "rateLimit": [
+        "create"
+      ],
+      "redis": [
+        "create"
+      ],
+      "redisStoreTokenSet": [
+        "create"
+      ],
+      "remoteCaching": [
+        "create"
+      ],
+      "repository": [
+        "create"
+      ],
+      "samlConfig": [
+        "create"
+      ],
+      "secret": [
+        "create"
+      ],
+      "sensitiveEnvironmentVariablePolicy": [
+        "create"
+      ],
+      "sharedEnvVars": [
+        "create"
+      ],
+      "sharedEnvVarsProduction": [
+        "create"
+      ],
+      "space": [
+        "create"
+      ],
+      "spaceRun": [
+        "create"
+      ],
+      "storeTransfer": [
+        "create"
+      ],
+      "supportCase": [
+        "create"
+      ],
+      "supportCaseComment": [
+        "create"
+      ],
+      "team": [
+        "create"
+      ],
+      "teamAccessRequest": [
+        "create"
+      ],
+      "teamFellowMembership": [
+        "create"
+      ],
+      "teamGitExclusivity": [
+        "create"
+      ],
+      "teamInvite": [
+        "create"
+      ],
+      "teamInviteCode": [
+        "create"
+      ],
+      "teamJoin": [
+        "create"
+      ],
+      "teamMemberMfaStatus": [
+        "create"
+      ],
+      "teamMicrofrontends": [
+        "create"
+      ],
+      "teamOwnMembership": [
+        "create"
+      ],
+      "teamOwnMembershipDisconnectSAML": [
+        "create"
+      ],
+      "token": [
+        "create"
+      ],
+      "usage": [
+        "create"
+      ],
+      "usageCycle": [
+        "create"
+      ],
+      "vercelRun": [
+        "create"
+      ],
+      "vercelRunExec": [
+        "create"
+      ],
+      "vpcPeeringConnection": [
+        "create"
+      ],
+      "webAnalyticsPlan": [
+        "create"
+      ],
+      "webhook": [
+        "create"
+      ],
+      "webhook-event": [
+        "create"
+      ],
+      "oauth2Connection": [
+        "create"
+      ],
+      "user": [
+        "create"
+      ],
+      "userConnection": [
+        "create"
+      ],
+      "userSudo": [
+        "create"
+      ],
+      "webAuthn": [
+        "create"
+      ]
+    },
+    "lastRollbackTarget": {},
+    "lastAliasRequest": {
+      "fromDeploymentId": "<string>",
+      "toDeploymentId": "<string>",
+      "fromRollingReleaseId": "<string>",
+      "jobStatus": "succeeded",
+      "requestedAt": 123,
+      "type": "promote"
+    },
+    "protectionBypass": {},
+    "hasActiveBranches": true,
+    "trustedIps": {
+      "deploymentType": "preview",
+      "addresses": [
+        {
+          "value": "<string>",
+          "note": "<string>"
+        }
+      ],
+      "protectionMode": "additional"
+    },
+    "gitComments": {
+      "onPullRequest": true,
+      "onCommit": true
+    },
+    "gitProviderOptions": {
+      "createDeployments": "enabled",
+      "disableRepositoryDispatchEvents": true,
+      "requireVerifiedCommits": true
+    },
+    "paused": true,
+    "concurrencyBucketName": "<string>",
+    "webAnalytics": {
+      "id": "<string>",
+      "disabledAt": 123,
+      "canceledAt": 123,
+      "enabledAt": 123,
+      "hasData": true
+    },
+    "security": {
+      "attackModeEnabled": true,
+      "attackModeUpdatedAt": 123,
+      "firewallEnabled": true,
+      "firewallUpdatedAt": 123,
+      "attackModeActiveUntil": 123,
+      "firewallConfigVersion": 123,
+      "firewallSeawallEnabled": true,
+      "ja3Enabled": true,
+      "ja4Enabled": true,
+      "firewallBypassIps": [
+        "<string>"
+      ],
+      "managedRules": {
+        "bot_filter": {
+          "active": true,
+          "action": "log"
+        },
+        "ai_bots": {
+          "active": true,
+          "action": "log"
+        },
+        "owasp": {
+          "active": true,
+          "action": "log"
+        }
+      },
+      "botIdEnabled": true
+    },
+    "oidcTokenConfig": {
+      "enabled": true,
+      "issuerMode": "team"
+    },
+    "tier": "standard",
+    "features": {
+      "webAnalytics": true
+    },
+    "v0": true,
+    "abuse": {
+      "scanner": "<string>",
+      "history": [
+        {
+          "scanner": "<string>",
+          "reason": "<string>",
+          "by": "<string>",
+          "byId": "<string>",
+          "at": 123
+        }
+      ],
+      "updatedAt": 123,
+      "block": {
+        "action": "blocked",
+        "reason": "<string>",
+        "statusCode": 123,
+        "createdAt": 123,
+        "caseId": "<string>",
+        "actor": "<string>",
+        "comment": "<string>",
+        "isCascading": true
+      },
+      "blockHistory": [
+        {
+          "action": "blocked",
+          "reason": "<string>",
+          "statusCode": 123,
+          "createdAt": 123,
+          "caseId": "<string>",
+          "actor": "<string>",
+          "comment": "<string>",
+          "isCascading": true
+        }
+      ],
+      "interstitial": true,
+      "interstitialHistory": [
+        {
+          "action": "add-interstitial",
+          "createdAt": 123,
+          "caseId": "<string>",
+          "reason": "<string>",
+          "actor": "<string>",
+          "comment": "<string>"
+        }
+      ]
+    },
+    "internalRoutes": [
+      {
+        "src": "<string>",
+        "status": 123
+      }
+    ]
+  }
