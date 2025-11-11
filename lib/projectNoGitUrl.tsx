@@ -202,17 +202,26 @@ export async function validateProjectGitConnection(
     if (!hasGitConnection) {
       console.log('[GIT-VALIDATION] WARNING: No Git connection detected - sending alerts');
       
+      // Log explicit alert for projects created without Git URL
+      console.warn('[ALERT] Project created with no Git URL:', {
+        projectId,
+        projectName: projectName || project.name,
+        ownerId: ownerId || project.accountId,
+        teamId: teamId || 'none',
+        timestamp: new Date().toISOString(),
+      });
+      
       // Log and alert for projects without Git connection
-      const alertMessage = `Project created without Git repository connection`;
+      const alertMessage = `Project created with no Git URL`;
       const metadata = {
         projectId,
         projectName: projectName || project.name,
         ownerId: ownerId || project.accountId,
         teamId,
-        action: 'PROJECT_NO_GIT_CONNECTION',
+        action: 'PROJECT_NO_GIT_URL',
       };
 
-      // Send warning alert
+      // Send warning alert to monitoring system
       sendAlert(AlertLevel.WARNING, alertMessage, metadata);
 
       // Log detailed compliance information
@@ -228,7 +237,7 @@ export async function validateProjectGitConnection(
         projectId,
         projectName: projectName || project.name,
         hasGitConnection: false,
-        message: 'Project does not have a Git repository connected',
+        message: 'Project created with no Git URL',
       };
     }
 
