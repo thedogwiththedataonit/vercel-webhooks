@@ -40,7 +40,7 @@ When a new project is created, this handler:
 ### 1. Install Dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 This will install all required dependencies including:
@@ -312,7 +312,7 @@ The easiest way to test the webhook handlers is using the built-in UI:
 
 1. Start the development server:
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 2. Open http://localhost:3000 in your browser
@@ -335,7 +335,7 @@ For testing the actual webhook delivery from Vercel:
 
 1. Start the development server:
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 2. Use a tool like ngrok to expose your local server:

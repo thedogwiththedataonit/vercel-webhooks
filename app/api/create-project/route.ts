@@ -72,9 +72,9 @@ export async function POST(request: NextRequest) {
         // Framework preset (optional, can be auto-detected)
         framework: 'nextjs',
         // Build settings
-        buildCommand: 'npm run build',
-        devCommand: 'npm run dev',
-        installCommand: 'npm install',
+        buildCommand: 'pnpm run build',
+        devCommand: 'pnpm run dev',
+        installCommand: 'pnpm install',
         outputDirectory: '.next',
         // Root directory (optional)
         rootDirectory: undefined,

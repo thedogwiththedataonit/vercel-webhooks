@@ -60,7 +60,7 @@ All operations run in parallel for optimal performance and use the official `@ve
 ### 1. Install Dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 2. Configure Environment Variables
@@ -83,7 +83,7 @@ VERCEL_TEAM_ID=team_xxxxxxxxxxxxx
 ### 3. Run the Application
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the documentation.
@@ -291,7 +291,7 @@ vercel deploy
 
 ### Using the UI (Recommended)
 
-1. Start the dev server: `npm run dev`
+1. Start the dev server: `pnpm run dev`
 2. Open [http://localhost:3000](http://localhost:3000)
 3. Click "Create Test Project"
 4. Enter a project name
