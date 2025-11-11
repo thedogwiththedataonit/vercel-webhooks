@@ -1,4 +1,18 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Webhook Event Types - Vercel Webhooks",
+  description: "Complete TypeScript type definitions for 50+ Vercel webhook events including deployment, domain, project, integration, marketplace, and observability events.",
+  openGraph: {
+    title: "Webhook Event Types - Vercel Webhooks",
+    description: "Complete TypeScript type definitions for 50+ Vercel webhook events.",
+  },
+  twitter: {
+    title: "Webhook Event Types - Vercel Webhooks",
+    description: "Complete TypeScript type definitions for 50+ Vercel webhook events.",
+  },
+};
 
 export default function TypesPage() {
   return (

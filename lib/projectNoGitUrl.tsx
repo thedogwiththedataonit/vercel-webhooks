@@ -127,17 +127,41 @@ export async function validateProjectGitConnection(
       bearerToken: process.env.VERCEL_TOKEN,
     });
 
-    // Fetch project details
-    const projectsResponse = await vercel.projects.getProjects({
-      search: projectId,
-      teamId,
-      limit: '1',
-    });
+    // Fetch project details with retry logic for newly created projects
+    // Projects might not be immediately queryable after creation
+    let project;
+    let retries = 3;
+    let delay = 1000; // Start with 1 second
 
-    const project = projectsResponse.projects?.[0];
+    for (let i = 0; i < retries; i++) {
+      try {
+        const projectsResponse = await vercel.projects.getProjects({
+          search: projectId,
+          teamId,
+          limit: '1',
+        });
+
+        project = projectsResponse.projects?.[0];
+
+        if (project && project.id === projectId) {
+          break; // Found the project
+        }
+
+        // Not found, wait before retry
+        if (i < retries - 1) {
+          console.log(`[GIT-VALIDATION] Project not found yet, retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 2; // Exponential backoff
+        }
+      } catch (apiError) {
+        if (i === retries - 1) throw apiError; // Last retry, throw error
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2;
+      }
+    }
 
     if (!project) {
-      throw new Error(`Project with ID ${projectId} not found`);
+      throw new Error(`Project with ID ${projectId} not found after retries`);
     }
 
     // Check Git connection

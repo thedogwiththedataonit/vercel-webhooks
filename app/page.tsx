@@ -1,4 +1,18 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Vercel Webhooks & SDK Educational App - Automated Project Management",
+  description: "Interactive documentation for building production-ready webhook handlers with Vercel SDK. Learn automated deployment protection, Git validation, and real-time project management with TypeScript.",
+  openGraph: {
+    title: "Vercel Webhooks & SDK Educational App",
+    description: "Interactive documentation for building production-ready webhook handlers with Vercel SDK.",
+  },
+  twitter: {
+    title: "Vercel Webhooks & SDK Educational App",
+    description: "Interactive documentation for building production-ready webhook handlers with Vercel SDK.",
+  },
+};
 
 export default function Home() {
   return (
@@ -682,7 +696,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-gray-600 dark:text-gray-400">
               Built with <span className="font-semibold">Vercel SDK</span> and <span className="font-semibold">Next.js</span>
-            </div>
+        </div>
             <div className="flex gap-6 text-sm">
               <Link
                 href="/types"
@@ -700,20 +714,20 @@ export default function Home() {
               </a>
               <a
                 href="https://vercel.com/docs/rest-api/reference/sdk"
-                target="_blank"
-                rel="noopener noreferrer"
+            target="_blank"
+            rel="noopener noreferrer"
                 className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
               >
                 SDK Docs
-              </a>
-              <a
+          </a>
+          <a
                 href="https://vercel.com/docs/rest-api/reference/endpoints/access-groups/reads-an-access-group"
-                target="_blank"
-                rel="noopener noreferrer"
+            target="_blank"
+            rel="noopener noreferrer"
                 className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
-              >
+          >
                 SDK Reference
-              </a>
+          </a>
             </div>
           </div>
         </div>

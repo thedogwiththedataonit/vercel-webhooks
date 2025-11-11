@@ -1,0 +1,11 @@
+# robots.txt for Vercel Webhooks Educational App
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://webhooks-example.vercel.app/sitemap.xml
+
+# Disallow API routes from crawling
+Disallow: /api/
+
