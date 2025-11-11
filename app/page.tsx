@@ -77,10 +77,10 @@ export default function Home() {
                   <div className="text-sm">
                     <div className="font-medium mb-1">Actions Taken:</div>
                     <ul className="text-gray-600 dark:text-gray-400 space-y-1 text-xs list-disc list-inside">
-                      <li>Fetch project details using <code className="bg-gray-100 dark:bg-gray-900 px-1 py-0.5 rounded">vercel.projects.getProjects()</code></li>
+                      <li>Fetch project directly via <code className="bg-gray-100 dark:bg-gray-900 px-1 py-0.5 rounded">GET /v9/projects/{'{id}'}</code> REST API</li>
                       <li>Check <code className="bg-gray-100 dark:bg-gray-900 px-1 py-0.5 rounded">project.link?.type</code> for Git connection</li>
-                      <li>Log warning alert if no Git connection found</li>
-                      <li>Send to monitoring system for compliance tracking</li>
+                      <li>Log <code className="bg-gray-100 dark:bg-gray-900 px-1 py-0.5 rounded">[ALERT] Project created with no Git URL</code></li>
+                      <li>Send alert to monitoring system for compliance tracking</li>
                     </ul>
                   </div>
                   <div className="text-sm">
@@ -253,9 +253,9 @@ export default function Home() {
                   <div className="border border-gray-300 dark:border-gray-700 rounded p-3 bg-white dark:bg-black space-y-2">
                     <div className="font-semibold text-gray-800 dark:text-gray-200">Git Validation</div>
                     <div className="space-y-1 text-gray-500">
-                      <div>• Initialize Vercel SDK</div>
-                      <div>• getProjects()</div>
+                      <div>• REST API: GET /v9/projects/id</div>
                       <div>• Check project.link?.type</div>
+                      <div>• Log if no Git URL found</div>
                       <div className="text-yellow-600 dark:text-yellow-400">⚠ Alert if no Git</div>
                     </div>
                   </div>
@@ -472,14 +472,14 @@ export default function Home() {
     },
   });
   
-  // Validate Git connection
-  const projectDetails = await vercel.projects.getProjects({
-    search: project.id,
-    teamId,
-    limit: '1',
+  // Validate Git connection using REST API
+  const url = \`https://api.vercel.com/v9/projects/\${project.id}\${teamId ? \`?teamId=\${teamId}\` : ''}\`;
+  const projectResponse = await fetch(url, {
+    headers: { 'Authorization': \`Bearer \${process.env.VERCEL_TOKEN}\` }
   });
+  const projectDetails = await projectResponse.json();
   
-  const hasGit = Boolean(projectDetails.projects?.[0]?.link?.type);
+  const hasGit = Boolean(projectDetails.link?.type);
   
   if (!hasGit) {
     // Log alert for compliance tracking
@@ -541,18 +541,14 @@ export default function Home() {
                   <code className="text-gray-800 dark:text-gray-200">{`if (event.type === 'deployment.promoted') {
   const { project, teamId, deployment } = event.payload;
   
-  // Validate Git connection was added
-  const vercel = new Vercel({
-    bearerToken: process.env.VERCEL_TOKEN,
+  // Validate Git connection was added using REST API
+  const url = \`https://api.vercel.com/v9/projects/\${project.id}\${teamId ? \`?teamId=\${teamId}\` : ''}\`;
+  const response = await fetch(url, {
+    headers: { 'Authorization': \`Bearer \${process.env.VERCEL_TOKEN}\` }
   });
+  const projectDetails = await response.json();
   
-  const projectDetails = await vercel.projects.getProjects({
-    search: project.id,
-    teamId,
-    limit: '1',
-  });
-  
-  const gitProvider = projectDetails.projects?.[0]?.link?.type;
+  const gitProvider = projectDetails.link?.type;
   
   if (gitProvider) {
     // Log successful Git connection

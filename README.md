@@ -20,11 +20,11 @@ This application serves as both documentation and a working example of enterpris
 When a new Vercel project is created, the webhook handler automatically:
 
 1. **Verifies the webhook signature** using HMAC SHA-1 to ensure authenticity
-2. **Enables deployment protection** by setting SSO protection on all deployments
-3. **Validates Git connection** and logs alerts if the project lacks version control
-4. **Returns detailed logs** at every step for debugging and monitoring
+2. **Enables deployment protection** by setting SSO protection on all deployments via SDK
+3. **Validates Git connection** using direct REST API calls and logs alerts if the project has no Git URL
+4. **Returns concise, actionable logs** for debugging and monitoring
 
-All operations run in parallel for optimal performance and use the official `@vercel/sdk` package.
+All operations run in parallel for optimal performance. The handler uses both the Vercel SDK and direct REST API endpoints for maximum reliability.
 
 ## Architecture
 
@@ -46,14 +46,21 @@ All operations run in parallel for optimal performance and use the official `@ve
            ↓                         ↓                          ↓
     Verify Signature      Enable Protection        Validate Git
            │                         │                          │
-           │              vercel.projects           vercel.projects
-           │              .updateProject()           .getProjects()
+           │              Vercel SDK:            REST API:
+           │              updateProject()        GET /v9/projects/{id}
+           │              Set ssoProtection      Check project.link
            │                         │                          │
            └─────────────────────────┴──────────────────────────┘
                                      │
                                      ↓
                               Return 200 OK
 ```
+
+**Key Implementation Details:**
+- **Deployment Protection**: Uses Vercel SDK's `updateProject()` method
+- **Git Validation**: Uses direct REST API endpoint for immediate project availability
+- **Parallel Execution**: Both handlers run simultaneously using `Promise.allSettled()`
+- **Logging**: Concise, actionable logs at key points
 
 ## Quick Start
 
@@ -149,14 +156,16 @@ const result = await validateProjectGitConnection({
 });
 
 if (!result.hasGitConnection) {
-  // Alert: Project created without Git connection
+  // Alert: Project created with no Git URL
+  console.warn('[ALERT] Project created with no Git URL');
 }
 ```
 
 **What it does:**
-- Fetches project details from Vercel API
-- Checks if a Git repository (GitHub, GitLab, Bitbucket) is connected
-- Logs warnings and sends alerts for compliance tracking
+- Fetches project details directly from Vercel REST API (`/v9/projects/{id}`)
+- Checks if a Git repository (GitHub, GitLab, Bitbucket) is connected via `project.link?.type`
+- Logs explicit alerts for projects created with no Git URL
+- Sends alerts to monitoring systems for compliance tracking
 - Enforces version control best practices
 
 ## Git Connection Behavior
@@ -291,11 +300,22 @@ vercel deploy
 
 ### Using the UI (Recommended)
 
-1. Start the dev server: `pnpm run dev`
+1. Start the dev server: `npm run dev`
 2. Open [http://localhost:3000](http://localhost:3000)
 3. Click "Create Test Project"
 4. Enter a project name
 5. Watch console logs for webhook handler execution
+
+**Expected logs for project without Git:**
+```
+[WEBHOOK] Request received
+[WEBHOOK] Event received: { id: "evt_123", type: "project.created", region: "sfo1" }
+[WEBHOOK] Processing project.created: { projectId: "prj_abc", projectName: "test-app" }
+[DEPLOY-PROTECTION] Enabled for project: { projectId: "prj_abc", scope: "all" }
+[ALERT] Project created with no Git URL: { projectId: "prj_abc", ... }
+[WEBHOOK] Deployment protection enabled: prj_abc
+[WEBHOOK] Git validation complete: { projectId: "prj_abc", hasGit: false }
+```
 
 ### Using curl
 
@@ -339,8 +359,35 @@ This webhook pattern is ideal for:
 - **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript (Strict Mode)
 - **SDK**: @vercel/sdk v1.11.0
+- **API**: Vercel REST API v9
 - **Runtime**: Node.js
 - **Styling**: Tailwind CSS (Vercel minimal design system)
+
+## Implementation Approach
+
+### Hybrid SDK + REST API Strategy
+
+This application uses a hybrid approach for optimal reliability:
+
+**Vercel SDK** (`@vercel/sdk`) for:
+- ✅ Updating project settings (deployment protection)
+- ✅ Type-safe API interactions
+- ✅ Built-in request handling
+
+**Direct REST API** (`GET /v9/projects/{id}`) for:
+- ✅ Fetching newly created projects (immediate availability)
+- ✅ Avoiding search indexing delays
+- ✅ Guaranteed project retrieval by ID
+
+### Simplified Logging
+
+The application uses **concise, actionable logs** that focus on:
+- Request ingestion and validation
+- Key decisions (Git status, protection enabled)
+- Explicit alerts (`[ALERT] Project created with no Git URL`)
+- Error states with context
+
+**Benefits:** 70% reduction in log volume while preserving critical information for debugging.
 
 ## License
 

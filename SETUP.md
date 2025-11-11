@@ -23,17 +23,21 @@ When a new project is created on Vercel, this handler automatically:
 ### 2. Git Connection Validation (`lib/projectNoGitUrl.tsx`)
 
 When a new project is created, this handler:
-- Fetches the full project details from Vercel
-- Checks if a Git repository (GitHub, GitLab, or Bitbucket) is connected
-- Logs a warning if no Git connection is found
+- Fetches project details directly using Vercel REST API (`GET /v9/projects/{id}`)
+- Checks if a Git repository (GitHub, GitLab, or Bitbucket) is connected via `project.link?.type`
+- Logs explicit alert: `[ALERT] Project created with no Git URL`
 - Sends alerts to your monitoring system
-- Provides detailed compliance information
+- Provides compliance tracking
 
 **Benefits:**
 - Enforces Git-based deployment workflows
+- Immediate project availability (no search indexing delays)
 - Ensures version control best practices
 - Provides audit trail for compliance
 - Enables integration with alerting systems
+
+**Technical Note:**
+Uses direct REST API instead of SDK search for guaranteed project retrieval immediately after creation.
 
 ## Installation
 
@@ -226,7 +230,7 @@ if (result.success) {
 
 Located in: `lib/projectNoGitUrl.tsx`
 
-Validates that a project has a Git repository connected.
+Validates that a project has a Git repository connected using direct REST API calls.
 
 **Parameters:**
 - `config.projectId` (string) - The Vercel project ID
@@ -235,6 +239,12 @@ Validates that a project has a Git repository connected.
 - `config.ownerId` (string, optional) - Owner ID from webhook payload
 
 **Returns:** `Promise<GitValidationResult>`
+
+**How it works:**
+- Fetches project directly using Vercel REST API: `GET /v9/projects/{projectId}`
+- Checks the `project.link?.type` field for Git connection status
+- Logs explicit alerts if no Git URL is found
+- More reliable than SDK search for newly created projects
 
 **Example:**
 ```typescript
@@ -245,7 +255,8 @@ const result = await validateProjectGitConnection({
 });
 
 if (!result.hasGitConnection) {
-  console.warn('Project missing Git connection:', result.message);
+  console.warn('[ALERT] Project created with no Git URL');
+  // Trigger remediation: pause, notify, or schedule deletion
 }
 ```
 
@@ -253,15 +264,17 @@ if (!result.hasGitConnection) {
 
 ### Current Implementation
 
-The project currently logs alerts to the console with structured metadata:
+The project logs concise, actionable alerts with structured metadata:
 
 ```typescript
-console.log('⚠️ [WARNING] Project created without Git repository connection', {
+console.warn('[ALERT] Project created with no Git URL:', {
   projectId: 'prj_abc123',
   projectName: 'my-app',
-  timestamp: '2025-11-11T...',
-  // ... additional metadata
+  ownerId: 'user_xyz',
+  teamId: 'personal',
 });
+
+// Also sent to monitoring system via sendAlert()
 ```
 
 ### Integration Points

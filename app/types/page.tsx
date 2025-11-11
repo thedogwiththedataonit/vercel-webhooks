@@ -381,7 +381,15 @@ function handleProjectCreated(
                 <code className="text-gray-800 dark:text-gray-200">{`import { VercelWebhookPayload, ProjectCreatedPayload } from './types';
 
 export async function POST(request: Request) {
-  const body: VercelWebhookPayload = await request.json();
+  // Read body once for signature and parsing
+  const bodyText = await request.text();
+  
+  // Verify signature
+  if (!verifySignature(bodyText, signature)) {
+    return Response.json({ error: 'Invalid signature' }, { status: 401 });
+  }
+  
+  const body: VercelWebhookPayload = JSON.parse(bodyText);
 
   // Type narrowing with switch statement
   switch (body.type) {
@@ -405,6 +413,17 @@ export async function POST(request: Request) {
 }`}</code>
               </pre>
             </div>
+          </div>
+
+          <div className="mt-6 border border-gray-200 dark:border-gray-800 rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+            <h3 className="text-sm font-semibold mb-2">Best Practices</h3>
+            <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-disc list-inside">
+              <li>Read request body once to avoid "unusable" errors</li>
+              <li>Use direct REST API (<code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded">GET /v9/projects/{'{id}'}</code>) for immediate project availability</li>
+              <li>Verify signatures before processing any payload</li>
+              <li>Use type narrowing for type-safe payload access</li>
+              <li>Log concisely at key decision points</li>
+            </ul>
           </div>
         </section>
 
