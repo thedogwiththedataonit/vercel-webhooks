@@ -62,34 +62,69 @@ interface DeploymentProtectionResult {
 export async function autoEnableDeploymentProtection(
   config: DeploymentProtectionConfig
 ): Promise<DeploymentProtectionResult> {
+  console.log('🔐 [DEPLOY-PROTECTION] Function called with config:', {
+    projectId: config.projectId,
+    teamId: config.teamId || 'none',
+    scope: config.scope || 'all',
+  });
+
   const { projectId, teamId, scope = 'all' } = config;
 
   try {
-    // Validate environment variables
+    // Step 1: Validate environment variables
+    console.log('📋 [DEPLOY-PROTECTION] Step 1: Validating environment variables');
     if (!process.env.VERCEL_TOKEN) {
+      console.error('❌ [DEPLOY-PROTECTION] VERCEL_TOKEN not set');
       throw new Error('VERCEL_TOKEN environment variable is not set');
     }
+    console.log('✅ [DEPLOY-PROTECTION] VERCEL_TOKEN is set');
 
-    // Initialize Vercel SDK client
-    const vercel = new Vercel({
-      bearerToken: process.env.VERCEL_TOKEN,
+    // Step 2: Initialize Vercel SDK client
+    console.log('📋 [DEPLOY-PROTECTION] Step 2: Initializing Vercel SDK');
+    let vercel: Vercel;
+    try {
+      vercel = new Vercel({
+        bearerToken: process.env.VERCEL_TOKEN,
+      });
+      console.log('✅ [DEPLOY-PROTECTION] Vercel SDK initialized');
+    } catch (sdkError) {
+      console.error('❌ [DEPLOY-PROTECTION] Failed to initialize Vercel SDK:', sdkError);
+      throw sdkError;
+    }
+
+    // Step 3: Prepare update request
+    const deploymentType = scope === 'all' ? 'all' : 'preview';
+    console.log('📋 [DEPLOY-PROTECTION] Step 3: Preparing update request:', {
+      projectId,
+      teamId: teamId || 'none',
+      deploymentType,
     });
 
-    // Enable deployment protection by setting SSO protection
-    // This requires Vercel Authentication for all deployments or just previews
-    await vercel.projects.updateProject({
-      idOrName: projectId,
-      teamId,
-      requestBody: {
-        ssoProtection: {
-          deploymentType: scope === 'all' ? 'all' : 'preview',
+    // Step 4: Enable deployment protection by setting SSO protection
+    console.log('📋 [DEPLOY-PROTECTION] Step 4: Calling updateProject API');
+    try {
+      await vercel.projects.updateProject({
+        idOrName: projectId,
+        teamId,
+        requestBody: {
+          ssoProtection: {
+            deploymentType: deploymentType as 'all' | 'preview',
+          },
         },
-      },
-    });
+      });
+      console.log('✅ [DEPLOY-PROTECTION] updateProject API call succeeded');
+    } catch (apiError) {
+      console.error('❌ [DEPLOY-PROTECTION] updateProject API call failed:', {
+        error: apiError,
+        message: apiError instanceof Error ? apiError.message : String(apiError),
+        stack: apiError instanceof Error ? apiError.stack : undefined,
+      });
+      throw apiError;
+    }
 
-    console.log(`✅ Deployment protection enabled for project: ${projectId}`, {
+    console.log(`✅ [DEPLOY-PROTECTION] Deployment protection enabled for project: ${projectId}`, {
       scope,
-      teamId,
+      teamId: teamId || 'none',
       timestamp: new Date().toISOString(),
     });
 
@@ -101,10 +136,12 @@ export async function autoEnableDeploymentProtection(
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
-    console.error(`❌ Failed to enable deployment protection for project: ${projectId}`, {
+    console.error(`❌ [DEPLOY-PROTECTION] FATAL ERROR for project: ${projectId}`, {
       error: errorMessage,
+      errorType: error?.constructor?.name,
+      errorStack: error instanceof Error ? error.stack : undefined,
       projectId,
-      teamId,
+      teamId: teamId || 'none',
       timestamp: new Date().toISOString(),
     });
 
@@ -141,16 +178,36 @@ export async function handleProjectCreatedEvent(
   projectPayload: { id: string; name?: string },
   teamId?: string
 ): Promise<DeploymentProtectionResult> {
-  console.log('🔐 Auto-enabling deployment protection for new project:', {
-    projectId: projectPayload.id,
-    projectName: projectPayload.name,
-    teamId,
+  console.log('🔐 [DEPLOY-PROTECTION] handleProjectCreatedEvent called:', {
+    projectId: projectPayload?.id || 'missing',
+    projectName: projectPayload?.name || 'missing',
+    teamId: teamId || 'none',
+    hasPayload: !!projectPayload,
   });
 
-  return autoEnableDeploymentProtection({
-    projectId: projectPayload.id,
-    teamId,
-    scope: 'all', // Protect all deployments including production
-  });
+  if (!projectPayload || !projectPayload.id) {
+    console.error('❌ [DEPLOY-PROTECTION] Invalid project payload - missing id');
+    return {
+      success: false,
+      projectId: 'unknown',
+      message: 'Invalid project payload - missing id',
+      error: 'Project payload or project id is missing',
+    };
+  }
+
+  console.log('🔐 [DEPLOY-PROTECTION] Auto-enabling deployment protection for new project');
+  
+  try {
+    const result = await autoEnableDeploymentProtection({
+      projectId: projectPayload.id,
+      teamId,
+      scope: 'all', // Protect all deployments including production
+    });
+    console.log('✅ [DEPLOY-PROTECTION] handleProjectCreatedEvent completed:', result);
+    return result;
+  } catch (error) {
+    console.error('❌ [DEPLOY-PROTECTION] handleProjectCreatedEvent error:', error);
+    throw error;
+  }
 }
 

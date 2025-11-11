@@ -129,6 +129,62 @@ Health check endpoint to verify the webhook is active.
 }
 ```
 
+### POST `/api/create-project`
+
+Creates a new Vercel project without a Git connection for testing webhook handlers.
+
+**Features:**
+- Creates projects using the Vercel SDK
+- Validates project name format
+- Automatically triggers webhook handlers
+- Returns project details and dashboard URL
+
+**Request Body:**
+```json
+{
+  "projectName": "my-test-project"
+}
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "message": "Project created successfully",
+  "projectId": "prj_abc123",
+  "projectName": "my-test-project",
+  "projectUrl": "https://vercel.com/team/my-test-project",
+  "webhookInfo": {
+    "message": "Webhook handlers should be triggered automatically",
+    "handlers": [
+      "Auto-enable deployment protection",
+      "Validate Git connection (will alert for missing Git)"
+    ]
+  }
+}
+```
+
+**Response (Error):**
+```json
+{
+  "error": "Error message",
+  "hint": "Helpful suggestion"
+}
+```
+
+### GET `/api/create-project`
+
+Returns information about the create-project endpoint.
+
+**Response:**
+```json
+{
+  "endpoint": "/api/create-project",
+  "method": "POST",
+  "description": "Create a Vercel project without Git connection for testing"
+}
+```
+
 ## Function Documentation
 
 ### `autoEnableDeploymentProtection(config)`
@@ -250,7 +306,32 @@ function sendAlert(level: AlertLevel, message: string, metadata: Record<string, 
 
 ## Testing
 
-### Test Webhook Locally
+### Easy Testing with UI (Recommended)
+
+The easiest way to test the webhook handlers is using the built-in UI:
+
+1. Start the development server:
+```bash
+npm run dev
+```
+
+2. Open http://localhost:3000 in your browser
+
+3. Click "Create Test Project"
+
+4. Enter a project name and click "Create Project"
+
+5. Watch the console logs to see the webhook handlers in action:
+   - ✅ Deployment protection enabled
+   - ⚠️ Git validation alert (no Git connection detected)
+
+6. Check the created project in your Vercel dashboard to verify the protection is enabled
+
+**Note:** This requires proper environment variables (`VERCEL_TOKEN`, `WEBHOOK_SECRET`) to be configured.
+
+### Test Webhook Locally with ngrok
+
+For testing the actual webhook delivery from Vercel:
 
 1. Start the development server:
 ```bash
@@ -262,13 +343,30 @@ npm run dev
 ngrok http 3000
 ```
 
-3. Configure the webhook in Vercel to point to your ngrok URL
+3. Configure the webhook in Vercel to point to your ngrok URL:
+   - URL: `https://your-ngrok-url.ngrok.io/api/webhooks`
+   - Events: `project.created`
+   - Secret: Your `WEBHOOK_SECRET` value
 
-4. Create a test project in Vercel to trigger the webhook
+4. Create a test project in Vercel (with or without Git) to trigger the webhook
 
-### Manual Testing
+5. Watch the webhook logs in both:
+   - Your local console
+   - Vercel webhook dashboard (Settings → Webhooks → Recent Deliveries)
 
-You can also test the functions directly:
+### Manual Testing via API
+
+You can test the create-project API endpoint directly using curl:
+
+```bash
+curl -X POST http://localhost:3000/api/create-project \
+  -H "Content-Type: application/json" \
+  -d '{"projectName": "my-test-project-123"}'
+```
+
+### Direct Function Testing
+
+You can also test the functions directly in your code:
 
 ```typescript
 import { autoEnableDeploymentProtection } from '@/lib/autoEnableDeploymentProtection';
@@ -295,10 +393,15 @@ const result2 = await validateProjectGitConnection({
 webhooks-example/
 ├── app/
 │   ├── api/
+│   │   ├── create-project/
+│   │   │   └── route.ts          # API to create test projects
 │   │   └── webhooks/
 │   │       └── route.ts          # Main webhook handler
+│   ├── create-project/
+│   │   └── page.tsx              # UI for creating test projects
 │   ├── layout.tsx
-│   └── page.tsx
+│   ├── page.tsx                  # Homepage with navigation
+│   └── globals.css
 ├── lib/
 │   ├── autoEnableDeploymentProtection.tsx  # Deployment protection logic
 │   └── projectNoGitUrl.tsx                  # Git validation logic
@@ -306,8 +409,17 @@ webhooks-example/
 │   └── get-project.json          # Example Vercel project API response
 ├── package.json
 ├── tsconfig.json
+├── SETUP.md                      # This file - comprehensive setup guide
 └── README.md
 ```
+
+### Key Files
+
+- **`app/api/webhooks/route.ts`**: Main webhook handler that processes `project.created` events
+- **`app/api/create-project/route.ts`**: API endpoint to create Vercel projects for testing
+- **`app/create-project/page.tsx`**: User-friendly UI to create test projects
+- **`lib/autoEnableDeploymentProtection.tsx`**: Automatic deployment protection enablement
+- **`lib/projectNoGitUrl.tsx`**: Git connection validation and alerting
 
 ## Security Considerations
 
