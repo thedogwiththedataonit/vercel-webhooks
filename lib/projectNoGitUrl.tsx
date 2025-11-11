@@ -68,9 +68,14 @@ function sendAlert(level: AlertLevel, message: string, metadata: Record<string, 
     },
   };
 
-  // Log to console with appropriate emoji
-  const emoji = level === AlertLevel.ERROR ? '🚨' : level === AlertLevel.WARNING ? '⚠️' : 'ℹ️';
-  console.log(`${emoji} [${level}] ${message}`, alert.metadata);
+  // Log to console with appropriate level
+  if (level === AlertLevel.ERROR) {
+    console.error(`[${level}] ${message}`, alert.metadata);
+  } else if (level === AlertLevel.WARNING) {
+    console.warn(`[${level}] ${message}`, alert.metadata);
+  } else {
+    console.log(`[${level}] ${message}`, alert.metadata);
+  }
 
   // TODO: Integrate with your monitoring/alerting system
   // Examples:
@@ -111,7 +116,7 @@ function sendAlert(level: AlertLevel, message: string, metadata: Record<string, 
 export async function validateProjectGitConnection(
   config: GitValidationConfig
 ): Promise<GitValidationResult> {
-  console.log('🔍 [GIT-VALIDATION] Function called with config:', {
+  console.log('[GIT-VALIDATION] Function called with config:', {
     projectId: config.projectId,
     projectName: config.projectName || 'none',
     teamId: config.teamId || 'none',
@@ -122,28 +127,28 @@ export async function validateProjectGitConnection(
 
   try {
     // Step 1: Validate environment variables
-    console.log('📋 [GIT-VALIDATION] Step 1: Validating environment variables');
+    console.log('[GIT-VALIDATION] Step 1: Validating environment variables');
     if (!process.env.VERCEL_TOKEN) {
-      console.error('❌ [GIT-VALIDATION] VERCEL_TOKEN not set');
+      console.error('[GIT-VALIDATION] ERROR: VERCEL_TOKEN not set');
       throw new Error('VERCEL_TOKEN environment variable is not set');
     }
-    console.log('✅ [GIT-VALIDATION] VERCEL_TOKEN is set');
+    console.log('[GIT-VALIDATION] VERCEL_TOKEN is set');
 
     // Step 2: Initialize Vercel SDK client
-    console.log('📋 [GIT-VALIDATION] Step 2: Initializing Vercel SDK');
+    console.log('[GIT-VALIDATION] Step 2: Initializing Vercel SDK');
     let vercel: Vercel;
     try {
       vercel = new Vercel({
         bearerToken: process.env.VERCEL_TOKEN,
       });
-      console.log('✅ [GIT-VALIDATION] Vercel SDK initialized');
+      console.log('[GIT-VALIDATION] Vercel SDK initialized');
     } catch (sdkError) {
-      console.error('❌ [GIT-VALIDATION] Failed to initialize Vercel SDK:', sdkError);
+      console.error('[GIT-VALIDATION] ERROR: Failed to initialize Vercel SDK:', sdkError);
       throw sdkError;
     }
 
     // Step 3: Fetch project details using getProjects with search
-    console.log('📋 [GIT-VALIDATION] Step 3: Fetching project details from Vercel API');
+    console.log('[GIT-VALIDATION] Step 3: Fetching project details from Vercel API');
     let projectsResponse;
     try {
       projectsResponse = await vercel.projects.getProjects({
@@ -151,11 +156,11 @@ export async function validateProjectGitConnection(
         teamId,
         limit: '1',
       });
-      console.log('✅ [GIT-VALIDATION] getProjects API call succeeded:', {
+      console.log('[GIT-VALIDATION] getProjects API call succeeded:', {
         projectsCount: projectsResponse.projects?.length || 0,
       });
     } catch (apiError) {
-      console.error('❌ [GIT-VALIDATION] getProjects API call failed:', {
+      console.error('[GIT-VALIDATION] ERROR: getProjects API call failed:', {
         error: apiError,
         message: apiError instanceof Error ? apiError.message : String(apiError),
         stack: apiError instanceof Error ? apiError.stack : undefined,
@@ -164,24 +169,24 @@ export async function validateProjectGitConnection(
     }
 
     // Step 4: Extract project from response
-    console.log('📋 [GIT-VALIDATION] Step 4: Extracting project from response');
+    console.log('[GIT-VALIDATION] Step 4: Extracting project from response');
     const project = projectsResponse.projects?.[0];
 
     if (!project) {
-      console.error('❌ [GIT-VALIDATION] Project not found in response');
+      console.error('[GIT-VALIDATION] ERROR: Project not found in response');
       throw new Error(`Project with ID ${projectId} not found`);
     }
-    console.log('✅ [GIT-VALIDATION] Project found:', {
+    console.log('[GIT-VALIDATION] Project found:', {
       id: project.id,
       name: project.name,
       hasLink: !!project.link,
     });
 
     // Step 5: Check if project has a Git connection
-    console.log('📋 [GIT-VALIDATION] Step 5: Checking Git connection');
+    console.log('[GIT-VALIDATION] Step 5: Checking Git connection');
     const hasGitConnection = Boolean(project.link?.type);
     const gitProvider = project.link?.type;
-    console.log('📋 [GIT-VALIDATION] Git connection status:', {
+    console.log('[GIT-VALIDATION] Git connection status:', {
       hasGitConnection,
       gitProvider: gitProvider || 'none',
     });
@@ -191,11 +196,11 @@ export async function validateProjectGitConnection(
     if (project.link) {
       const link = project.link as any;
       repository = link.repo || link.name || link.projectName || link.slug;
-      console.log('📋 [GIT-VALIDATION] Repository info:', { repository });
+      console.log('[GIT-VALIDATION] Repository info:', { repository });
     }
 
     if (!hasGitConnection) {
-      console.log('⚠️  [GIT-VALIDATION] No Git connection detected - sending alerts');
+      console.log('[GIT-VALIDATION] WARNING: No Git connection detected - sending alerts');
       
       // Log and alert for projects without Git connection
       const alertMessage = `Project created without Git repository connection`;
@@ -211,7 +216,7 @@ export async function validateProjectGitConnection(
       sendAlert(AlertLevel.WARNING, alertMessage, metadata);
 
       // Log detailed compliance information
-      console.warn('📋 [GIT-VALIDATION] Compliance Check Failed:', {
+      console.warn('[GIT-VALIDATION] Compliance Check Failed:', {
         check: 'Git Connection Required',
         recommendation: 'Connect a GitHub, GitLab, or Bitbucket repository',
         documentationUrl: 'https://vercel.com/docs/concepts/git',
@@ -228,7 +233,7 @@ export async function validateProjectGitConnection(
     }
 
     // Project has Git connection - log success
-    console.log('✅ [GIT-VALIDATION] Git connection validated successfully:', {
+    console.log('[GIT-VALIDATION] Git connection validated successfully:', {
       projectId,
       projectName: projectName || project.name,
       gitProvider,
@@ -248,7 +253,7 @@ export async function validateProjectGitConnection(
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-    console.error('❌ [GIT-VALIDATION] FATAL ERROR:', {
+    console.error('[GIT-VALIDATION] FATAL ERROR:', {
       error: errorMessage,
       errorType: error?.constructor?.name,
       errorStack: error instanceof Error ? error.stack : undefined,
@@ -301,7 +306,7 @@ export async function handleProjectCreatedEvent(
   projectPayload: { id: string; name?: string; ownerId?: string },
   teamId?: string
 ): Promise<GitValidationResult> {
-  console.log('🔍 [GIT-VALIDATION] handleProjectCreatedEvent called:', {
+  console.log('[GIT-VALIDATION] handleProjectCreatedEvent called:', {
     projectId: projectPayload?.id || 'missing',
     projectName: projectPayload?.name || 'missing',
     ownerId: projectPayload?.ownerId || 'none',
@@ -310,7 +315,7 @@ export async function handleProjectCreatedEvent(
   });
 
   if (!projectPayload || !projectPayload.id) {
-    console.error('❌ [GIT-VALIDATION] Invalid project payload - missing id');
+    console.error('[GIT-VALIDATION] ERROR: Invalid project payload - missing id');
     return {
       success: false,
       projectId: 'unknown',
@@ -321,7 +326,7 @@ export async function handleProjectCreatedEvent(
     };
   }
 
-  console.log('🔍 [GIT-VALIDATION] Validating Git connection for new project');
+  console.log('[GIT-VALIDATION] Validating Git connection for new project');
 
   try {
     const result = await validateProjectGitConnection({
@@ -330,10 +335,10 @@ export async function handleProjectCreatedEvent(
       teamId,
       ownerId: projectPayload.ownerId,
     });
-    console.log('✅ [GIT-VALIDATION] handleProjectCreatedEvent completed:', result);
+    console.log('[GIT-VALIDATION] handleProjectCreatedEvent completed:', result);
     return result;
   } catch (error) {
-    console.error('❌ [GIT-VALIDATION] handleProjectCreatedEvent error:', error);
+    console.error('[GIT-VALIDATION] ERROR: handleProjectCreatedEvent error:', error);
     throw error;
   }
 }

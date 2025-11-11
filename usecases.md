@@ -12,20 +12,23 @@ Put together webhook scripts for use cases
 ---
 
 ## Project creation triggers webhook to enable deployment projection on all deployments (including prod)
-- project.created https://vercel.com/docs/webhooks/webhooks-api#project.created
-
 
 ### Trigger
+- project.created https://vercel.com/docs/webhooks/webhooks-api#project.created
 
 ### Check
+deploymentType: deploymentType as 'all' | 'preview',
 
 ---
 
 ## Project git url is changed or removed
 
 ### Trigger
+Removing a git repo triggers -> project.removed event
+Adding a git repo to a project with none triggers -> deployment.promoted
 
 ### Check
+check for git repo or matching
 
 ---
 

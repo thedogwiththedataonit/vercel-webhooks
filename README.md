@@ -1,51 +1,351 @@
-app.post("/vercel-webhook", async (req, res) => {
-  // Verify signature first
-  if (!verifySignature(req)) {
-    return res.status(401).send("Invalid signature");
-  }
+# Vercel Webhooks & SDK Educational App
 
-  const event = req.body;
+An interactive documentation and demonstration application for learning how to build production-ready webhook handlers using the Vercel API, Vercel SDK, and TypeScript.
 
-  if (event.type === "project.created") {
-    const { id: projectId, name, ownerId } = event.payload.project;
+## Overview
 
-    // Fetch full project details
-    const project = await vercel.projects.getProject({ 
-      idOrName: projectId, 
-      teamId 
-    });
+This application serves as both documentation and a working example of enterprise-grade webhook handling. It demonstrates how to automatically secure and validate Vercel projects when they're created, using real-time webhook events and the official Vercel SDK.
 
-    const hasGit = Boolean(project.link?.type);
+### Key Features
 
-    if (!hasGit) {
-      // 1) Lock with deployment protection
-      await vercel.projects.updateProject({
-        idOrName: projectId,
-        teamId,
-        requestBody: {
-          protectionBypass: { 
-            scope: "all" // or "non-production"
-          }
-        }
-      });
+- **🔐 Automatic Deployment Protection**: Enables SSO protection on all deployments when projects are created
+- **🔍 Git Connection Validation**: Detects and alerts when projects lack Git repository connections
+- **📘 Interactive Documentation**: Clean, minimal UI explaining webhook architecture and usage
+- **🔒 Production-Ready Security**: HMAC signature verification for all webhook requests
+- **📦 Complete Type System**: TypeScript types for 50+ Vercel webhook events
+- **🧪 Built-in Testing**: UI to create test projects and trigger webhook handlers
 
-      // 2) Log for audit
-      await logCompliance({
-        projectId,
-        projectName: name,
-        action: "LOCKED_NO_GIT",
-        timestamp: new Date()
-      });
+## What This App Does
 
-      // 3) Notify
-      await notifyOwners(project, 
-        `Project "${name}" was locked. Connect a GitHub repo within 48h.`
-      );
+When a new Vercel project is created, the webhook handler automatically:
 
-      // 4) Optional: Schedule deletion check
-      await scheduleComplianceCheck(projectId, "48h");
-    }
-  }
+1. **Verifies the webhook signature** using HMAC SHA-1 to ensure authenticity
+2. **Enables deployment protection** by setting SSO protection on all deployments
+3. **Validates Git connection** and logs alerts if the project lacks version control
+4. **Returns detailed logs** at every step for debugging and monitoring
 
-  res.sendStatus(200);
-});# vercel-webhooks
+All operations run in parallel for optimal performance and use the official `@vercel/sdk` package.
+
+## Architecture
+
+```
+┌─────────────────────┐
+│  Vercel Platform    │
+│  (Project Created)  │
+└──────────┬──────────┘
+           │
+           │ project.created webhook
+           ↓
+┌─────────────────────┐
+│  Webhook Handler    │
+│  /api/webhooks      │
+└──────────┬──────────┘
+           │
+           ├─────────────────────────┬──────────────────────────┐
+           │                         │                          │
+           ↓                         ↓                          ↓
+    Verify Signature      Enable Protection        Validate Git
+           │                         │                          │
+           │              vercel.projects           vercel.projects
+           │              .updateProject()           .getProjects()
+           │                         │                          │
+           └─────────────────────────┴──────────────────────────┘
+                                     │
+                                     ↓
+                              Return 200 OK
+```
+
+## Quick Start
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Configure Environment Variables
+
+Create a `.env.local` file:
+
+```bash
+# Required: Vercel API token
+# Get yours at: https://vercel.com/account/tokens
+VERCEL_TOKEN=your_vercel_api_token_here
+
+# Required: Webhook signature secret
+# Use: openssl rand -hex 32
+WEBHOOK_SECRET=your_webhook_secret_here
+
+# Optional: Team ID for team projects
+VERCEL_TEAM_ID=team_xxxxxxxxxxxxx
+```
+
+### 3. Run the Application
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the documentation.
+
+### 4. Test the Webhook Handlers
+
+1. Click **"Create Test Project"** on the homepage
+2. Enter a project name (e.g., `my-test-app-123`)
+3. Click **"Create Project"**
+4. Watch the console logs to see webhook handlers in action
+
+## Project Structure
+
+```
+webhooks-example/
+├── app/
+│   ├── api/
+│   │   ├── create-project/
+│   │   │   └── route.ts          # API to create test projects
+│   │   └── webhooks/
+│   │       ├── route.ts          # Main webhook handler
+│   │       └── types.ts          # TypeScript types for all events
+│   ├── create-project/
+│   │   └── page.tsx              # UI for testing
+│   ├── types/
+│   │   └── page.tsx              # Type documentation
+│   └── page.tsx                  # Homepage documentation
+├── lib/
+│   ├── autoEnableDeploymentProtection.tsx  # Deployment protection logic
+│   └── projectNoGitUrl.tsx                  # Git validation logic
+└── response-examples/
+    └── get-project.json          # Example API response
+```
+
+## Webhook Event Handlers
+
+### Handler 1: Auto-Enable Deployment Protection
+
+```typescript
+import { autoEnableDeploymentProtection } from '@/lib/autoEnableDeploymentProtection';
+
+const result = await autoEnableDeploymentProtection({
+  projectId: 'prj_abc123',
+  teamId: 'team_xyz789',
+  scope: 'all' // Protect all deployments including production
+});
+```
+
+**What it does:**
+- Enables SSO Protection (Vercel Authentication) for all deployments
+- Requires team authentication to access deployments
+- Provides security and compliance for production workloads
+
+### Handler 2: Git Connection Validation
+
+```typescript
+import { validateProjectGitConnection } from '@/lib/projectNoGitUrl';
+
+const result = await validateProjectGitConnection({
+  projectId: 'prj_abc123',
+  projectName: 'my-app',
+  teamId: 'team_xyz789'
+});
+
+if (!result.hasGitConnection) {
+  // Alert: Project created without Git connection
+}
+```
+
+**What it does:**
+- Fetches project details from Vercel API
+- Checks if a Git repository (GitHub, GitLab, Bitbucket) is connected
+- Logs warnings and sends alerts for compliance tracking
+- Enforces version control best practices
+
+## Git Connection Behavior
+
+### Creating Projects Without Git
+
+Projects can be created without a Git repository connection:
+- Useful for testing webhook handlers
+- Enables CLI-based deployments
+- Supports temporary or prototype projects
+- `project.created` webhook fires regardless of Git status
+
+### Webhook Events Related to Git
+
+| Action | Webhook Event | Description |
+|--------|---------------|-------------|
+| Create project (with or without Git) | `project.created` | Fires when any project is created |
+| Disconnect Git from project | `project.removed` | Fires when Git connection is removed |
+| Add/reconnect Git to project | `deployment.promoted` | Fires when Git connection is added |
+
+## Type System
+
+The application includes complete TypeScript type definitions for all 50+ Vercel webhook events:
+
+- **Deployment Events**: `deployment.created`, `deployment.succeeded`, etc.
+- **Domain Events**: `domain.created`, `domain.renewal`, etc.
+- **Project Events**: `project.created`, `project.removed`, etc.
+- **Integration Events**: `integration-configuration.*`, etc.
+- **Marketplace Events**: `marketplace.invoice.*`, etc.
+- **Observability Events**: `observability.usage-anomaly`, etc.
+
+[View complete type documentation →](/types)
+
+## Security
+
+### 1. Signature Verification
+
+All webhook requests are verified using HMAC SHA-1 signatures:
+
+```typescript
+const signature = crypto
+  .createHmac('sha1', WEBHOOK_SECRET)
+  .update(bodyText, 'utf-8')
+  .digest('hex');
+
+if (signature !== request.headers.get('x-vercel-signature')) {
+  return Response.json({ error: 'Invalid signature' }, { status: 401 });
+}
+```
+
+### 2. Environment Variables
+
+Sensitive credentials are never exposed:
+- `VERCEL_TOKEN` - Stored securely, used only in API routes
+- `WEBHOOK_SECRET` - Verified on every request
+- All secrets are server-side only
+
+### 3. Type Safety
+
+TypeScript ensures compile-time safety:
+- No runtime type errors
+- Autocomplete for all webhook events
+- Type-safe payload access
+
+## API Routes
+
+### `POST /api/webhooks`
+
+Main webhook endpoint that processes Vercel events.
+
+**Headers:**
+- `x-vercel-signature`: HMAC SHA-1 signature for verification
+- `content-type`: `application/json`
+
+**Response:**
+```json
+{
+  "received": true,
+  "id": "webhook_event_id"
+}
+```
+
+### `POST /api/create-project`
+
+Creates a test project without Git connection.
+
+**Request:**
+```json
+{
+  "projectName": "my-test-project"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "projectId": "prj_abc123",
+  "projectUrl": "https://vercel.com/..."
+}
+```
+
+## Documentation
+
+The application includes extensive documentation:
+
+- **Homepage** (`/`): Architecture overview, SDK usage examples, security features
+- **Event Types** (`/types`): Complete webhook type definitions and examples
+- **Create Project** (`/create-project`): Interactive testing interface
+- **Setup Guide** (`SETUP.md`): Detailed configuration and deployment instructions
+- **Type Guide** (`WEBHOOK_TYPES_GUIDE.md`): Technical deep-dive on the type system
+
+## Deployment
+
+### Deploy to Vercel
+
+```bash
+vercel deploy
+```
+
+### Configure Webhook in Vercel Dashboard
+
+1. Go to **Settings → Webhooks**
+2. Click **"Create Webhook"**
+3. Configure:
+   - **URL**: `https://your-app.vercel.app/api/webhooks`
+   - **Events**: Select `project.created`
+   - **Secret**: Your `WEBHOOK_SECRET` value
+4. Save and test
+
+## Testing
+
+### Using the UI (Recommended)
+
+1. Start the dev server: `npm run dev`
+2. Open [http://localhost:3000](http://localhost:3000)
+3. Click "Create Test Project"
+4. Enter a project name
+5. Watch console logs for webhook handler execution
+
+### Using curl
+
+```bash
+curl -X POST http://localhost:3000/api/create-project \
+  -H "Content-Type: application/json" \
+  -d '{"projectName": "my-test-project-123"}'
+```
+
+### Testing with ngrok
+
+For testing real Vercel webhook delivery:
+
+```bash
+# Expose local server
+ngrok http 3000
+
+# Configure webhook in Vercel to point to ngrok URL
+# Create a project in Vercel to trigger webhook
+```
+
+## Learning Resources
+
+- [Vercel Webhooks Documentation](https://vercel.com/docs/observability/webhooks-overview)
+- [Vercel SDK Documentation](https://sdk.vercel.ai/docs)
+- [Vercel API Reference](https://vercel.com/docs/rest-api)
+- [Next.js Documentation](https://nextjs.org/docs)
+
+## Use Cases
+
+This webhook pattern is ideal for:
+
+- **Security Compliance**: Automatically enforce deployment protection
+- **Policy Enforcement**: Validate Git connections for audit requirements
+- **DevOps Automation**: Auto-configure projects based on organizational policies
+- **Monitoring & Alerting**: Track project creation and configuration changes
+- **Integration Testing**: Learn webhook patterns before production deployment
+
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript (Strict Mode)
+- **SDK**: @vercel/sdk v1.11.0
+- **Runtime**: Node.js
+- **Styling**: Tailwind CSS (Vercel minimal design system)
+
+## License
+
+This is an educational example project. Use it to learn and build your own webhook handlers.
+
+---
+
+Built with the [Vercel SDK](https://sdk.vercel.ai) and [Next.js](https://nextjs.org)
