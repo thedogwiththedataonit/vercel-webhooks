@@ -2,38 +2,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { handleProjectCreatedEvent as handleDeploymentProtection } from '@/lib/autoEnableDeploymentProtection';
 import { handleProjectCreatedEvent as handleGitValidation } from '@/lib/projectNoGitUrl';
+import {
+  VercelWebhookPayload,
+  ProjectCreatedPayload,
+  WebhookEventType,
+} from './types';
 
-// Type definition for the Vercel webhook payload
-interface VercelWebhookPayload<T = any> {
-  id: string;
-  type: string;
-  createdAt: number;
-  payload: T;
-  region: string;
-}
+/**
+ * Verifies the webhook signature
+ * @param bodyText - The raw request body as text
+ * @param signature - The x-vercel-signature header value
+ * @returns true if signature is valid
+ */
+function verifySignature(bodyText: string, signature: string | null): boolean {
+  if (!signature || !process.env.WEBHOOK_SECRET) {
+    return false;
+  }
 
-// Type definition for project.created event payload
-interface ProjectCreatedPayload {
-  project: {
-    id: string;
-    name: string;
-    ownerId?: string;
-    accountId?: string;
-  };
-  teamId?: string;
-}
-
-async function verifySignature(req: NextRequest): Promise<boolean> {
-  const payload = await req.text();
-  const signature = crypto
-    .createHmac('sha1', process.env.WEBHOOK_SECRET!)
-    .update(payload)
+  const expectedSignature = crypto
+    .createHmac('sha1', process.env.WEBHOOK_SECRET)
+    .update(bodyText, 'utf-8')
     .digest('hex');
-  return signature === req.headers.get('x-vercel-signature');
+
+  return expectedSignature === signature;
 }
 
 export async function POST(request: NextRequest) {
   console.log('🚀 [WEBHOOK] Incoming webhook request received');
+  
+  // IMPORTANT: Read the body ONCE as text - we'll use it for both signature verification and JSON parsing
+  let bodyText: string;
   
   try {
     // Step 1: Check environment configuration
@@ -56,18 +54,35 @@ export async function POST(request: NextRequest) {
     }
     console.log('✅ [WEBHOOK] VERCEL_TOKEN is configured');
 
-    // Step 2: Log request headers
-    console.log('📋 [WEBHOOK] Step 2: Request headers:', {
-      signature: request.headers.get('x-vercel-signature') ? 'present' : 'missing',
+    // Step 2: Read the raw request body
+    console.log('📋 [WEBHOOK] Step 2: Reading request body');
+    try {
+      bodyText = await request.text();
+      console.log('✅ [WEBHOOK] Request body read successfully:', {
+        bodyLength: bodyText.length,
+        bodyPreview: bodyText.substring(0, 100) + (bodyText.length > 100 ? '...' : ''),
+      });
+    } catch (readError) {
+      console.error('❌ [WEBHOOK] Failed to read request body:', readError);
+      return NextResponse.json(
+        { error: 'Failed to read request body' },
+        { status: 400 }
+      );
+    }
+
+    // Step 3: Log request headers
+    const signatureHeader = request.headers.get('x-vercel-signature');
+    console.log('📋 [WEBHOOK] Step 3: Request headers:', {
+      signature: signatureHeader ? 'present' : 'missing',
       contentType: request.headers.get('content-type'),
       userAgent: request.headers.get('user-agent'),
     });
 
-    // Step 3: Verify the signature
-    console.log('📋 [WEBHOOK] Step 3: Verifying signature');
+    // Step 4: Verify the signature
+    console.log('📋 [WEBHOOK] Step 4: Verifying signature');
     let isValid = false;
     try {
-      isValid = await verifySignature(request);
+      isValid = verifySignature(bodyText, signatureHeader);
       console.log(`✅ [WEBHOOK] Signature verification result: ${isValid}`);
     } catch (sigError) {
       console.error('❌ [WEBHOOK] Signature verification error:', sigError);
@@ -82,12 +97,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 4: Parse the request body
-    console.log('📋 [WEBHOOK] Step 4: Parsing request body');
+    // Step 5: Parse the JSON body
+    console.log('📋 [WEBHOOK] Step 5: Parsing JSON body');
     let body: VercelWebhookPayload;
     try {
-      const clonedRequest = request.clone();
-      body = await clonedRequest.json();
+      body = JSON.parse(bodyText);
       console.log('✅ [WEBHOOK] Body parsed successfully:', {
         hasId: !!body.id,
         hasType: !!body.type,
@@ -103,8 +117,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 5: Validate required fields
-    console.log('📋 [WEBHOOK] Step 5: Validating required fields');
+    // Step 6: Validate required fields
+    console.log('📋 [WEBHOOK] Step 6: Validating required fields');
     if (!body.id || !body.type || !body.createdAt || !body.payload) {
       console.error('❌ [WEBHOOK] Missing required fields:', {
         id: !!body.id,
@@ -119,17 +133,17 @@ export async function POST(request: NextRequest) {
     }
     console.log('✅ [WEBHOOK] All required fields present');
 
-    // Step 6: Log the webhook event details
-    console.log('📋 [WEBHOOK] Step 6: Webhook event details:', {
+    // Step 7: Log the webhook event details
+    console.log('📋 [WEBHOOK] Step 7: Webhook event details:', {
       id: body.id,
       type: body.type,
       createdAt: new Date(body.createdAt).toISOString(),
       region: body.region || 'unknown',
     });
 
-    // Step 7: Handle project.created events
+    // Step 8: Handle project.created events
     if (body.type === 'project.created') {
-      console.log('📋 [WEBHOOK] Step 7: Processing project.created event');
+      console.log('📋 [WEBHOOK] Step 8: Processing project.created event');
       
       let projectPayload: ProjectCreatedPayload;
       try {
@@ -163,8 +177,8 @@ export async function POST(request: NextRequest) {
         teamId,
       });
 
-      // Step 8: Run handlers in parallel
-      console.log('📋 [WEBHOOK] Step 8: Starting parallel handler execution');
+      // Step 9: Run handlers in parallel
+      console.log('📋 [WEBHOOK] Step 9: Starting parallel handler execution');
       console.log('🔄 [WEBHOOK] Invoking handleDeploymentProtection...');
       console.log('🔄 [WEBHOOK] Invoking handleGitValidation...');
 
@@ -182,8 +196,8 @@ export async function POST(request: NextRequest) {
         throw handlerError;
       }
 
-      // Step 9: Log handler results
-      console.log('📋 [WEBHOOK] Step 9: Processing handler results');
+      // Step 10: Log handler results
+      console.log('📋 [WEBHOOK] Step 10: Processing handler results');
       
       if (deploymentProtectionResult.status === 'fulfilled') {
         console.log('✅ [WEBHOOK] Deployment protection succeeded:', {
@@ -217,8 +231,8 @@ export async function POST(request: NextRequest) {
       console.log(`ℹ️  [WEBHOOK] Ignoring event type: ${body.type}`);
     }
 
-    // Step 10: Return success response
-    console.log('📋 [WEBHOOK] Step 10: Returning success response');
+    // Step 11: Return success response
+    console.log('📋 [WEBHOOK] Step 11: Returning success response');
     console.log('✅ [WEBHOOK] Webhook processing completed successfully');
     return NextResponse.json(
       { received: true, id: body.id },
