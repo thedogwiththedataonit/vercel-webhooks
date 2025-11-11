@@ -123,45 +123,26 @@ export async function validateProjectGitConnection(
       throw new Error('VERCEL_TOKEN environment variable is not set');
     }
 
-    const vercel = new Vercel({
-      bearerToken: process.env.VERCEL_TOKEN,
+    // Fetch project directly using REST API endpoint
+    // This is more reliable than SDK search for newly created projects
+    const url = `https://api.vercel.com/v9/projects/${projectId}${teamId ? `?teamId=${teamId}` : ''}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${process.env.VERCEL_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
     });
 
-    // Fetch project details with retry logic for newly created projects
-    // Projects might not be immediately queryable after creation
-    let project;
-    let retries = 3;
-    let delay = 1000; // Start with 1 second
-
-    for (let i = 0; i < retries; i++) {
-      try {
-        const projectsResponse = await vercel.projects.getProjects({
-          search: projectId,
-          teamId,
-          limit: '1',
-        });
-
-        project = projectsResponse.projects?.[0];
-
-        if (project && project.id === projectId) {
-          break; // Found the project
-        }
-
-        // Not found, wait before retry
-        if (i < retries - 1) {
-          console.log(`[GIT-VALIDATION] Project not found yet, retrying in ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 2; // Exponential backoff
-        }
-      } catch (apiError) {
-        if (i === retries - 1) throw apiError; // Last retry, throw error
-        await new Promise(resolve => setTimeout(resolve, delay));
-        delay *= 2;
-      }
+    if (!response.ok) {
+      throw new Error(`Failed to fetch project: ${response.status} ${response.statusText}`);
     }
 
-    if (!project) {
-      throw new Error(`Project with ID ${projectId} not found after retries`);
+    const project = await response.json();
+
+    if (!project || !project.id) {
+      throw new Error(`Project with ID ${projectId} not found`);
     }
 
     // Check Git connection
