@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { handleProjectCreatedEvent as handleDeploymentProtection } from '@/lib/autoEnableDeploymentProtection';
+import { handleProjectCreatedEvent as handleGitValidation } from '@/lib/projectNoGitUrl';
 
 // Type definition for the Vercel webhook payload
 interface VercelWebhookPayload<T = any> {
@@ -8,6 +10,17 @@ interface VercelWebhookPayload<T = any> {
   createdAt: number;
   payload: T;
   region: string;
+}
+
+// Type definition for project.created event payload
+interface ProjectCreatedPayload {
+  project: {
+    id: string;
+    name: string;
+    ownerId?: string;
+    accountId?: string;
+  };
+  teamId?: string;
 }
 
 async function verifySignature(req: NextRequest): Promise<boolean> {
@@ -61,6 +74,36 @@ export async function POST(request: NextRequest) {
       region: body.region,
     });
 
+    // Handle project.created events
+    if (body.type === 'project.created') {
+      const projectPayload = body.payload as ProjectCreatedPayload;
+      const teamId = projectPayload.teamId || process.env.VERCEL_TEAM_ID;
+
+      console.log('🎯 Processing project.created event:', {
+        projectId: projectPayload.project.id,
+        projectName: projectPayload.project.name,
+        teamId,
+      });
+
+      // Run both handlers in parallel for better performance
+      const [deploymentProtectionResult, gitValidationResult] = await Promise.allSettled([
+        handleDeploymentProtection(projectPayload.project, teamId),
+        handleGitValidation(projectPayload.project, teamId),
+      ]);
+
+      // Log results
+      if (deploymentProtectionResult.status === 'fulfilled') {
+        console.log('Deployment protection result:', deploymentProtectionResult.value);
+      } else {
+        console.error('Deployment protection failed:', deploymentProtectionResult.reason);
+      }
+
+      if (gitValidationResult.status === 'fulfilled') {
+        console.log('Git validation result:', gitValidationResult.value);
+      } else {
+        console.error('Git validation failed:', gitValidationResult.reason);
+      }
+    }
 
     // Return success response
     return NextResponse.json(
